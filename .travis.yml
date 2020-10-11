@@ -11,14 +11,18 @@ matrix:
       dist: bionic
     - python: 3.8
       dist: bionic
-    - python: 3.9
-      dist: bionic
+    # no Python 3.9 yet in Travis (Oct 11, 2020)
+    #- python: 3.9
+    #  dist: bionic
     # unfortunately Pipenv is not working on PyPy 3.5
     # see https://github.com/pypa/pipenv/issues/3313
     # - python: pypy3.5
     #   dist: xenial
-    - python: pypy3.6-7.2.0
-      dist: bionic
+    # unfortunately typed-ast doesn't work in PyPy
+    # see https://github.com/python/typed_ast/issues/111
+    # Maybe once PyPy reaches version 3.8
+    #- python: pypy3.6-7.2.0
+    #  dist: bionic
 before-install:
   - sudo apt-get update
   # redis-sentinel install fails in bionic on Travis CI due to dependencies,
