@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.com/zoltan-fedor/falcon-limiter.svg?branch=master)](https://travis-ci.com/zoltan-fedor/falcon-limiter)
-[![codecov](https://codecov.io/gh/zoltan-fedor/falcon-limiter/branch/master/graph/badge.svg)](https://codecov.io/gh/zoltan-fedor/falcon-limiter)
+[![Build Status](https://travis-ci.com/zoltan-fedor/falcon-limiter.svg?branch=main)](https://travis-ci.com/zoltan-fedor/falcon-limiter)
+[![codecov](https://codecov.io/gh/zoltan-fedor/falcon-limiter/branch/main/graph/badge.svg)](https://codecov.io/gh/zoltan-fedor/falcon-limiter)
 [![Documentation Status](https://readthedocs.org/projects/falcon-limiter/badge/?version=latest)](https://falcon-limiter.readthedocs.io/en/latest/?badge=latest)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/zoltan-fedor/falcon-limiter)
 
