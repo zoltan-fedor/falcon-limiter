@@ -1,0 +1,28 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+autodoc = "*"
+bump2version = "*"
+flit = "*"
+importlib-metadata = "*"
+pylibmc = "*"
+pytest = "*"
+pytest-cov = "*"
+pytest-pep8 = "*"
+pytest-xdist = "*"
+pytest-xprocess = "*"
+redis = "*"
+mypy = "*"
+sphinx = "*"
+tox = "*"
+tox-pipenv-install = "*"
+
+[packages]
+falcon = "*"
+limits = "*"
+
+[requires]
+python_version = "3.8"

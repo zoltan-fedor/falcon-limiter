@@ -1,0 +1,9 @@
+[run]
+branch = True
+source = falcon_limiter
+# omit = falcon_limiter/tests*,falcon_limiter/cmd*
+
+parallel = True
+
+[report]
+show_missing = True

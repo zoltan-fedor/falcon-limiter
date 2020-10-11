@@ -1,0 +1,58 @@
+[build-system]
+requires = ["flit_core >=2,<3"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.metadata]
+module = "falcon_limiter"
+dist-name = "falcon-limiter"
+author = "Zoltan Fedor"
+author-email = "zoltan.1.fedor@gmail.com"
+home-page = "https://github.com/zoltan-fedor/falcon-limiter"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Web Environment",
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.5",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Internet :: WWW/HTTP :: WSGI :: Middleware",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed"
+]
+requires = [
+    "falcon >=1.0.0",
+    "limits"
+]
+description-file = "README.md"
+requires-python = ">=3.6"
+
+[tool.flit.metadata.urls]
+Documentation = "https://falcon-limiter.readthedocs.io/en/latest/"
+
+[tool.flit.metadata.requires-extra]
+test = [
+    "flit",
+    "pylibmc",
+    "pytest >=4.0.0",
+    "pytest-cov",
+    "pytest-pep8",
+    "pytest-xdist",
+    "pytest-xprocess",
+    "redis",
+    "tox",
+    "tox-pipenv-install"
+]
+doc = []
+dev = []
+all = []

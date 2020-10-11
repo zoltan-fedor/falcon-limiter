@@ -1,0 +1,44 @@
+language: python
+os: linux
+dist: bionic
+sudo: required
+matrix:
+  include:
+    # see Travis-supported Python versions at https://docs.travis-ci.com/user/languages/python/
+    - python: 3.6
+      dist: bionic
+    - python: 3.7
+      dist: bionic
+    - python: 3.8
+      dist: bionic
+    - python: 3.9
+      dist: bionic
+    # unfortunately Pipenv is not working on PyPy 3.5
+    # see https://github.com/pypa/pipenv/issues/3313
+    # - python: pypy3.5
+    #   dist: xenial
+    - python: pypy3.6-7.2.0
+      dist: bionic
+before-install:
+  - sudo apt-get update
+  # redis-sentinel install fails in bionic on Travis CI due to dependencies,
+  # so we can't test the Redis Sentinel backed on Travis only locally
+  # - sudo apt-get -y install libmemcached-dev memcached redis-server redis-sentinel
+  - sudo apt-get -y install libmemcached-dev memcached redis-server
+  - pip install codecov
+install:
+  - pip install pipenv
+  - pipenv install --dev
+script: pytest --cov-report term-missing
+after_success:
+  - coverage combine
+  - codecov
+cache:
+  directories:
+    - $PIP_CACHE_DIR
+    - $PIPENV_CACHE_DIR
+env:
+  global:
+    - PIP_CACHE_DIR=$HOME/.cache/pip
+    - PIPENV_CACHE_DIR=$HOME/.cache/pipenv
+    - TRAVIS=yes

@@ -1,0 +1,17 @@
+*.py[co]
+.*.swp
+.tox
+docs/_build/*
+*.egg-info
+build/*
+dist/
+.idea/
+.idea/*
+.coverage
+.cache
+.xprocess
+.vscode
+.mypy_cache
+Pipfile.lock
+todos.txt
+tests/sentinel.conf
