@@ -26,7 +26,7 @@ class Limiter:
     and then supply the object's middleware to the Falcon app.
 
     Args:
-        key_func (callable): A function that will receive the usual falcon response method arguments
+        key_func (callable): A function that will receive the usual Falcon request method arguments
                             (req, resp, resource, params) and expected to return a string which will
                             be used as a representation of the user for whom the rate limit will apply
                             (eg the key).
@@ -34,17 +34,26 @@ class Limiter:
         default_deduct_when (callable): A function which determines at response time whether the given request
                                         should be counted against the limit or not. This allows the creation
                                         of strategies incorporating the response status code.
+        default_dynamic_limits (callable): A function which builds the 'limits' string dynamically
+                                           based on the Falcon request method arguments (req, resp, resource, params).
+                                           It is expected to return a 'limits' string like '1/second;3 per hour'.
         config (dict of str): Optional config settings provided as a dictionary
 
     Attributes:
-        key_func (callable): A function that will receive the usual falcon response method arguments
+        key_func (callable): A function that will receive the usual Falcon request method arguments
                              (req, resp, resource, params) and expected to return a string which will
                              be used as a representation of the user for whom the rate limit will apply
                              (eg the key).
         default_limits (str): Optional string of limit(s) separated by ";", like '1/second;3 per hour'
+        default_deduct_when (callable): A function which determines at response time whether the given request
+                                        should be counted against the limit or not. This allows the creation
+                                        of strategies incorporating the response status code.
+        default_dynamic_limits (callable): A function which builds the 'limits' string dynamically
+                                           based on the Falcon request method arguments (req, resp, resource, params).
+                                           It is expected to return a 'limits' string like '1/second;3 per hour'.
         config (dict of str): Config settings stored as a dictionary
-        storage (:obj:`Storage`): The storage backend that will be used to store the ratelimits.
-        limiter (:obj:`RateLimiter`): A `RateLimiter` object from the `limits` library, representing the ratelimiting
+        storage (:obj:`Storage`): The storage backend that will be used to store the rate limits.
+        limiter (:obj:`RateLimiter`): A `RateLimiter` object from the `limits` library, representing the rate limiting
                                       strategy and storage.
     """
 
@@ -52,6 +61,7 @@ class Limiter:
                  key_func: Callable=get_remote_addr,
                  default_limits: str='',
                  default_deduct_when: Callable=None,
+                 default_dynamic_limits: Callable=None,
                  config: Optional[Dict[str, Any]]=None) -> None:
 
         if not config:
@@ -66,6 +76,7 @@ class Limiter:
         self.key_func = key_func
         self.default_limits = default_limits
         self.default_deduct_when = default_deduct_when
+        self.default_dynamic_limits = default_dynamic_limits
         self.config = config
 
         self.storage = storage_from_string(self.config['RATELIMIT_STORAGE_URL'],
@@ -82,7 +93,8 @@ class Limiter:
         """
         return Middleware(limiter=self)
 
-    def limit(self, limits: str=None, deduct_when: Callable=None, key_func: Callable=None):
+    def limit(self, limits: str=None, deduct_when: Callable=None,
+              key_func: Callable=None, dynamic_limits: Callable=None):
         """ This is the decorator used to decorate a resource class or the requested
         method of the resource class with the default or with a custom limit
 
@@ -100,6 +112,9 @@ class Limiter:
                                  (req, resp, resource, params) and expected to return a string which will
                                  be used as a representation of the user for whom the rate limit will apply
                                  (eg the key).
+            dynamic_limits (callable): A function which builds the 'limits' string dynamically
+                                       based on the Falcon request method arguments (req, resp, resource, params).
+                                       It is expected to return a 'limits' string like '1/second;3 per hour'.
         """
         def wrap1(class_or_method, *args):
             # is this about decorating a class or a given method?
@@ -125,6 +140,7 @@ class Limiter:
                 limit_wrap.__limits = limits
                 limit_wrap.__deduct_when = deduct_when
                 limit_wrap.__key_func = key_func
+                limit_wrap.__dynamic_limits = dynamic_limits
 
                 return limit_wrap
 

@@ -2,10 +2,10 @@ from falcon import HTTP_429, HTTPTooManyRequests, COMBINED_METHODS
 from limits import parse as parse_limits
 import logging
 import re
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Tuple
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Tuple, Iterable, Union
 
 if TYPE_CHECKING:
-    from falcon_limiter.limiter import Limiter
+    from falcon_limiter.limiter import Limiter, RateLimitItem
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +50,7 @@ class Middleware:
                 decorator_limits = getattr(getattr(resource, responder), '_Limiter__limits')
                 decorator_deduct_when = getattr(getattr(resource, responder), '_Limiter__deduct_when')
                 decorator_key_func = getattr(getattr(resource, responder), '_Limiter__key_func')
+                decorator_dynamic_limits = getattr(getattr(resource, responder), '_Limiter__dynamic_limits')
 
                 # set the 'limits', 'parsed_limits', 'key_func' and 'deduct_when' on the resource if doesn't exist yet
                 if not hasattr(resource, f'_{req.method}_limits'):
@@ -57,14 +58,7 @@ class Middleware:
                     setattr(resource, f'_{req.method}_limits', _limits)
 
                     # parse the limits into a list of RateLimitItem objects
-                    if _limits:
-                        # _limits might be an iterable - in which case we need to turn it into a string
-                        if not isinstance(_limits, str):
-                            # '_limits' is an iterable
-                            _limits = ';'.join(_limits)
-                        _parsed_limits = [parse_limits(l.strip()) for l in re.split(';|,', _limits)]
-                    else:
-                        _parsed_limits = []
+                    _parsed_limits = self.parse_limits(limits=_limits) if _limits else []
 
                     setattr(resource, f'_{req.method}_parsed_limits', _parsed_limits)
                     logger.debug(f" The limits parsed into RateLimitItem object(s) are: {_parsed_limits}")
@@ -77,22 +71,43 @@ class Middleware:
                             f'_{req.method}_deduct_when',
                             decorator_deduct_when if decorator_deduct_when else
                             self.limiter.default_deduct_when if hasattr(self.limiter, 'default_deduct_when') else None)
+                    setattr(resource,
+                            f'_{req.method}_dynamic_limits',
+                            decorator_dynamic_limits if decorator_dynamic_limits else
+                            self.limiter.default_dynamic_limits if hasattr(self.limiter, 'default_dynamic_limits')
+                            else None)
             else:
                 # no limiter was requested on this responder
                 logger.debug(" No limiter was requested for this endpoint.")
                 return
 
+        if not hasattr(resource, f'_{req.method}_limits'):
+            logger.debug(" No limits on this resource/method.")
+            return
+
+        # get the attributes from the resource
         _limits = getattr(resource, f'_{req.method}_limits')
         _parsed_limits = getattr(resource, f'_{req.method}_parsed_limits')
         _key_func = getattr(resource, f'_{req.method}_key_func')
         _deduct_when = getattr(resource, f'_{req.method}_deduct_when')
+        _dynamic_limits = getattr(resource, f'_{req.method}_dynamic_limits')
         logger.debug(f" The limits to be used: {_limits}")
         logger.debug(f" The parsed_limits to be used: {_parsed_limits}")
         logger.debug(f" The key_func function to be used: {_key_func}")
         logger.debug(f" The deduct_when function to be used: {_deduct_when}")
+        logger.debug(f" The dynamic_limits function to be used: {_dynamic_limits}")
 
-        if not _limits:
-            logger.debug(f" There was no 'limits' set on this endpoint, so no reason to check the limits.")
+        # if dynamic limits have been requested, then that will overwrite whatever (if anything)
+        # is provided via the 'limits'
+        if _dynamic_limits:
+            _limits = _dynamic_limits(req, resp, resource, params)
+            # parse the limits into a list of RateLimitItem objects
+            _parsed_limits = self.parse_limits(limits=_limits) if _limits else []
+        # print(_parsed_limits)
+
+        if not _limits or not _parsed_limits:
+            logger.debug(f" There was no 'limits' (or dynamic_limits) set on this endpoint,"
+                         f" so no reason to check the limits.")
             return
 
         #########
@@ -146,3 +161,15 @@ class Middleware:
                     # hit the given limit for the given key - but we don't care about the result,
                     # as we only use it to increment their counters
                     self.limiter.limiter.hit(_limit, _key)
+
+    @staticmethod
+    def parse_limits(limits: Union[str, Iterable[str]]) -> List['RateLimitItem']:
+        """ Takes a string of limits (eg '5 per minute,2 per second') or an iterable
+        of limits (eg ['5 per minute', '2 per second']) and sends each to be parsed into
+        a proper rule and returns a List of these parsed rules.
+        """
+        # _limits might be an iterable - in which case we need to turn it into a string
+        if not isinstance(limits, str):
+            # 'limits' is an iterable
+            limits = ';'.join(limits)
+        return [parse_limits(l.strip()) for l in re.split(';|,', limits)]

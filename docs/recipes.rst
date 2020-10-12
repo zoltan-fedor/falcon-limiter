@@ -99,6 +99,45 @@ so then your custom key function can pick it up from there.
 ..
 
 
+Dynamic limits
+--------------
+
+With the use of the ``default_dynamic_limits`` and ``dynamic_limits`` parameters you can
+define the limits dynamically, at the time of the processing of the request.
+
+This allows you to define different limits by users - for example allowing an admin user
+higher limit than others, or differentiating the limits based on the 'subscription' the
+given requester belongs to.
+
+.. code-block:: python
+
+    from falcon_limiter.utils import get_remote_addr
+
+    limiter = Limiter(
+        key_func=get_remote_addr,
+        # the default limit is 9999/second for admin and
+        # 20/minute,2/second for everybody else:
+        default_dynamic_limits=lambda req, resp, resource, params:
+            '9999/second' if req.context.user == 'admin'
+            else '20/minute,2/second'
+    )
+
+    @limiter.limit()
+    class ThingsResource:
+        # this endpoint gets a 5/second limit for those sending
+        the APIUSER=admin header:
+        @limiter.limit(dynamic_limits=lambda req, resp, resource, params:
+            '5/second'if req.get_header('APIUSER') == 'admin'
+            else '20/minute,2/second'
+        def on_get(self, req, resp):
+            resp.body = 'Hello world!'
+
+        def on_post(self, req, resp):
+            resp.body = 'Hello world!'
+
+..
+
+
 Customizing rate limits based on response
 -----------------------------------------
 
@@ -117,13 +156,15 @@ parameter or to the decorator as ``deduct_when`` parameter.
         key_func=get_remote_addr,
         default_limits=["10 per hour", "2 per minute"],
         # this will apply to ALL limits:
-        default_deduct_when=lambda req, resp, resource, req_succeeded: resp.status == falcon.HTTP_200
+        default_deduct_when=lambda req, resp, resource, req_succeeded:
+            resp.status == falcon.HTTP_200
     )
 
     @limiter.limit()
     class ThingsResource:
         # this deduct when only applies to this method
-        @limiter.limit(deduct_when=lambda req, resp, resource, req_succeeded: resp.status != falcon.HTTP_500)
+        @limiter.limit(deduct_when=lambda req, resp, resource, req_succeeded:
+            resp.status != falcon.HTTP_500)
         def on_get(self, req, resp):
             resp.body = 'Hello world!'
 

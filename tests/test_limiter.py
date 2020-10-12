@@ -1,6 +1,6 @@
 """ Test the different scenarios of limiter.py
 """
-from falcon import API, testing, HTTP_200, HTTP_429
+from falcon import API, testing, HTTP_200, HTTP_429, HTTP_405
 from falcon_limiter import Limiter
 from falcon_limiter.utils import get_remote_addr
 from time import sleep
@@ -335,3 +335,21 @@ def test_empy_limits():
     for i in range(5):
         r = client.simulate_get('/things')
         assert r.status == HTTP_200
+
+
+def test_undefined_endpoint(limiter):
+    """ Test calling a method which is not defined at all
+
+    Our module should not error, but we should leave it to Falcon to handle it - and return a 405.
+    """
+    @limiter.limit()
+    class ThingsResource:
+        def on_get(self, req, resp):
+            resp.body = 'Hello world!'
+
+    app = API(middleware=limiter.middleware)
+    app.add_route('/things', ThingsResource())
+
+    client = testing.TestClient(app)
+    r = client.simulate_post('/things')
+    assert r.status == HTTP_405

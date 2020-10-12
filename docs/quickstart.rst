@@ -63,15 +63,26 @@ and running the application behind a reverse proxy:
             resp.body = 'Hello world!'
 
         # a more strict rate limit applied to this method
-        # with a custom key function serving up the user_id from the request context as key
+        # with a custom key function serving up the user_id
+        # from the request context as key
         @limiter.limit(limits="3 per minute,1 per second",
-                       key_func=lambda req, resp, resource, params: req.context.user_id)
+            key_func=lambda req, resp, resource, params: req.context.user_id)
         def on_post(self, req, resp):
+            resp.body = 'Hello world!'
+
+    class SpecialResource:
+        # dynamic_limits allowing the 'admin' user a higher limit than others
+        @limiter.limit(dynamic_limits=lambda req, resp, resource, params:
+            '999/minute,9999/second' if req.context.user == 'admin'
+            else '5 per minute,2/second')
+        def on_get(self, req, resp):
             resp.body = 'Hello world!'
 
     # add the limiter middleware to the Falcon app
     app = falcon.API(middleware=limiter.middleware)
 
     things = ThingsResource()
+    special = SpecialResource()
     app.add_route('/things', things)
+    app.add_route('/special', special)
 ..
