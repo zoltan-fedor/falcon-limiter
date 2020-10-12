@@ -76,15 +76,28 @@ class ThingsResource:
         resp.body = 'Hello world!'
 
     # a more strict rate limit applied to this method
-    @limiter.limit(limits="3 per minute,1 per second")
+    # with a custom key function serving up the user_id
+    # from the request context as key
+    @limiter.limit(limits="3 per minute,1 per second",
+        key_func=lambda req, resp, resource, params: req.context.user_id)
     def on_post(self, req, resp):
+        resp.body = 'Hello world!'
+
+class SpecialResource:
+    # dynamic_limits allowing the 'admin' user a higher limit than others
+    @limiter.limit(dynamic_limits=lambda req, resp, resource, params:
+        '999/minute,9999/second' if req.context.user == 'admin'
+        else '5 per minute,2/second')
+    def on_get(self, req, resp):
         resp.body = 'Hello world!'
 
 # add the limiter middleware to the Falcon app
 app = falcon.API(middleware=limiter.middleware)
 
 things = ThingsResource()
+special = SpecialResource()
 app.add_route('/things', things)
+app.add_route('/special', special)
 ```
 
 For more details please read the documentation at [Read the Docs](https://falcon-limiter.readthedocs.io/en/latest/)
