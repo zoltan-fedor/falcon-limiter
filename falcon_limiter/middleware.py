@@ -49,6 +49,7 @@ class Middleware:
                 # the arguments provided in the decorator (if any):
                 decorator_limits = getattr(getattr(resource, responder), '_Limiter__limits')
                 decorator_deduct_when = getattr(getattr(resource, responder), '_Limiter__deduct_when')
+                decorator_key_func = getattr(getattr(resource, responder), '_Limiter__key_func')
 
                 # set the 'limits', 'parsed_limits', 'key_func' and 'deduct_when' on the resource if doesn't exist yet
                 if not hasattr(resource, f'_{req.method}_limits'):
@@ -68,7 +69,10 @@ class Middleware:
                     setattr(resource, f'_{req.method}_parsed_limits', _parsed_limits)
                     logger.debug(f" The limits parsed into RateLimitItem object(s) are: {_parsed_limits}")
 
-                    setattr(resource, f'_{req.method}_key_func', self.limiter.key_func)
+                    setattr(resource,
+                            f'_{req.method}_key_func',
+                            decorator_key_func if decorator_key_func else
+                            self.limiter.key_func if hasattr(self.limiter, 'key_func') else None)
                     setattr(resource,
                             f'_{req.method}_deduct_when',
                             decorator_deduct_when if decorator_deduct_when else

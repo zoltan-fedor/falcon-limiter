@@ -3,6 +3,7 @@
 from falcon import API, testing, HTTP_200, HTTP_429
 from falcon_limiter import Limiter
 from falcon_limiter.utils import get_remote_addr
+import pytest
 from time import sleep
 
 
@@ -109,3 +110,60 @@ def test_limit_by_resource_and_method():
     # but a different endpoint can still be hit
     r = client.simulate_post('/things')
     assert r.status == HTTP_200
+
+
+def test_key_func_in_class_decorator():
+    """ Test using the key_func parameter in the decorator
+    """
+
+    def get_key(req, resp, resource, params) -> str:
+        """ Test key function """
+        raise ValueError('We did hit our custom key function!')
+
+    limiter = Limiter(
+        key_func=get_remote_addr,
+        default_limits=["10 per hour", "1 per second"]
+    )
+
+    @limiter.limit(key_func=get_key)
+    class ThingsResource:
+        def on_get(self, req, resp):
+            resp.body = 'Hello world!'
+
+    app = API(middleware=limiter.middleware)
+    app.add_route('/things', ThingsResource())
+
+    client = testing.TestClient(app)
+
+    # our customer 'get_key' function gets called, which throws an error:
+    with pytest.raises(ValueError):
+        r = client.simulate_get('/things')
+
+
+def test_key_func_in_method_decorator():
+    """ Test using the key_func parameter in the decorator
+    """
+
+    def get_key(req, resp, resource, params) -> str:
+        """ Test key function """
+        raise ValueError('We did hit our custom key function!')
+
+    limiter = Limiter(
+        key_func=get_remote_addr,
+        default_limits=["10 per hour", "1 per second"]
+    )
+
+    @limiter.limit()
+    class ThingsResource:
+        @limiter.limit(limits="1 per minute", key_func=get_key)
+        def on_get(self, req, resp):
+            resp.body = 'Hello world!'
+
+    app = API(middleware=limiter.middleware)
+    app.add_route('/things', ThingsResource())
+
+    client = testing.TestClient(app)
+
+    # our customer 'get_key' function gets called, which throws an error:
+    with pytest.raises(ValueError):
+        r = client.simulate_get('/things')

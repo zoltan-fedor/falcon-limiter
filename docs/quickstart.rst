@@ -63,7 +63,9 @@ and running the application behind a reverse proxy:
             resp.body = 'Hello world!'
 
         # a more strict rate limit applied to this method
-        @limiter.limit(limits="3 per minute,1 per second")
+        # with a custom key function serving up the user_id from the request context as key
+        @limiter.limit(limits="3 per minute,1 per second",
+                       key_func=lambda req, resp, resource, params: req.context.user_id)
         def on_post(self, req, resp):
             resp.body = 'Hello world!'
 

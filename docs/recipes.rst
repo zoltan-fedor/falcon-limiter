@@ -35,6 +35,12 @@ a custom key function which derives the requestor's IP address from the ``access
 
     @limiter.limit()
     class ThingsResource:
+        def on_get(self, req, resp):
+            resp.body = 'Hello world!'
+
+        # this endpoint is routed differently (through 2 proxies), so it
+        # requires a custom key function specific to this method
+        @limiter.limit(key_func=lambda req, resp, resource, params: req.access_route[-3])
         def on_post(self, req, resp):
             resp.body = 'Hello world!'
 ..

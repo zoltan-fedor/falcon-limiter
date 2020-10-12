@@ -28,7 +28,8 @@ class Limiter:
     Args:
         key_func (callable): A function that will receive the usual falcon response method arguments
                             (req, resp, resource, params) and expected to return a string which will
-                            be used as a representation of the user for whom the rate limit will apply.
+                            be used as a representation of the user for whom the rate limit will apply
+                            (eg the key).
         default_limits (str): Optional string of limit(s) separated by ";", like '1/second;3 per hour'
         default_deduct_when (callable): A function which determines at response time whether the given request
                                         should be counted against the limit or not. This allows the creation
@@ -38,7 +39,8 @@ class Limiter:
     Attributes:
         key_func (callable): A function that will receive the usual falcon response method arguments
                              (req, resp, resource, params) and expected to return a string which will
-                             be used as a representation of the user for whom the rate limit will apply.
+                             be used as a representation of the user for whom the rate limit will apply
+                             (eg the key).
         default_limits (str): Optional string of limit(s) separated by ";", like '1/second;3 per hour'
         config (dict of str): Config settings stored as a dictionary
         storage (:obj:`Storage`): The storage backend that will be used to store the ratelimits.
@@ -80,7 +82,7 @@ class Limiter:
         """
         return Middleware(limiter=self)
 
-    def limit(self, limits: str=None, deduct_when: Callable=None):
+    def limit(self, limits: str=None, deduct_when: Callable=None, key_func: Callable=None):
         """ This is the decorator used to decorate a resource class or the requested
         method of the resource class with the default or with a custom limit
 
@@ -94,6 +96,10 @@ class Limiter:
             deduct_when (callable): A function which determines at response time whether the given request
                                     should be counted against the limit or not. This allows the creation
                                     of strategies incorporating the response status code.
+            key_func (callable): A function that will receive the usual falcon response method arguments
+                                 (req, resp, resource, params) and expected to return a string which will
+                                 be used as a representation of the user for whom the rate limit will apply
+                                 (eg the key).
         """
         def wrap1(class_or_method, *args):
             # is this about decorating a class or a given method?
@@ -114,10 +120,11 @@ class Limiter:
                 # mark the fact that this method has already been decorated:
                 limit_wrap.__limits_decorated = True
 
-                # store the 'limits' an 'deduct_when' arguments of the decorator on the function, so
-                # it can be picked up in the process_resource method in middleware.py
+                # store the arguments of the decorator on the function, so
+                # these can be picked up in the process_resource method in middleware.py
                 limit_wrap.__limits = limits
                 limit_wrap.__deduct_when = deduct_when
+                limit_wrap.__key_func = key_func
 
                 return limit_wrap
 
