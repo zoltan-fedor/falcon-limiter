@@ -1,0 +1,4 @@
+div.body {
+    min-width: auto !important;
+    max-width: none !important;
+}

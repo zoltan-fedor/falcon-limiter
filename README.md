@@ -62,7 +62,8 @@ limiter = Limiter(
     key_func=get_access_route_addr,
     default_limits="5 per minute,2 per second",
     # only count HTTP 200 responses against the limit:
-    default_deduct_when=lambda req, resp, resource, req_succeeded: resp.status == falcon.HTTP_200,
+    default_deduct_when=lambda req, resp, resource, req_succeeded:
+        resp.status == falcon.HTTP_200,
     config={
         'RATELIMIT_KEY_PREFIX': 'myapp',  # to allow multiple apps in the same Redis db
         'RATELIMIT_STORAGE_URL': f'redis://:{REDIS_PSW}@{REDIS_HOST}:{REDIS_PORT}',
