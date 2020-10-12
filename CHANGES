@@ -5,6 +5,7 @@ Version 0.1.0
 -------------
 
 - Added the ability to supply a custom `key_func` on the class/methods decorators
+- Added the dynamic_limits parameter allowing limits to be built at request time
 
 
 Version 0.0.1

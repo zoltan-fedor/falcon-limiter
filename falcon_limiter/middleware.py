@@ -5,7 +5,8 @@ import re
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Tuple, Iterable, Union
 
 if TYPE_CHECKING:
-    from falcon_limiter.limiter import Limiter, RateLimitItem
+    from falcon_limiter.limiter import Limiter
+    from limits import RateLimitItem
 
 logger = logging.getLogger(__name__)
 
