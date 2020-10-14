@@ -94,7 +94,7 @@ class Limiter:
         return Middleware(limiter=self)
 
     def limit(self, limits: str=None, deduct_when: Callable=None,
-              key_func: Callable=None, dynamic_limits: Callable=None):
+              key_func: Callable=None, dynamic_limits: Callable=None) -> Callable:
         """ This is the decorator used to decorate a resource class or the requested
         method of the resource class with the default or with a custom limit
 
@@ -143,5 +143,17 @@ class Limiter:
                 limit_wrap.__dynamic_limits = dynamic_limits
 
                 return limit_wrap
+
+        # this is the name which will check for if the decorator was registered with the register()
+        # function, as this decorator is not the topmost one
+        wrap1._decorator_name = 'limit'  # type: ignore
+
+        # store the arguments of the decorator on the wrap1 function too
+        # - for when there are multiple decorators registered with the register() utility,
+        # so these can be picked up in the process_resource method in middleware.py
+        wrap1._limits = limits  # type: ignore
+        wrap1._deduct_when = deduct_when  # type: ignore
+        wrap1._key_func = key_func  # type: ignore
+        wrap1._dynamic_limits = dynamic_limits  # type: ignore
 
         return wrap1

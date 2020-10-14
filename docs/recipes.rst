@@ -173,6 +173,64 @@ parameter or to the decorator as ``deduct_when`` parameter.
 ..
 
 
+Multiple decorators
+-------------------
+
+For scenarios where there is a need for multiple decorators and the ``@limiter.limit()`` cannot be the
+topmost one, we need to register the decorators a special way.
+
+This scenario is complicated because our ``@limiter.limit()`` just marks the fact that the given
+method is decorated with a limit, which mark later the middleware picks up and uses. If the
+``@limiter.limit()`` is the topmost
+decorator then it is easy to pick that up, but if there are other decorators 'ahead' it, then those
+will 'hide' the  ``@limiter.limit()``. This is because decorators in Python are just syntactic sugar
+for nested function calls.
+
+To be able to tell if the given endpoint was decorated by the ``@limiter.limit()`` decorator when that is NOT
+the topmost decorator, you need to decorate your method by registering your decorators using the
+``register()`` helper decorator.
+
+See more about this issue at
+https://stackoverflow.com/questions/3232024/introspection-to-get-decorator-names-on-a-method
+
+
+.. code-block:: python
+
+    import falcon
+    from falcon_limiter import Limiter
+    from falcon_limiter.utils import register
+
+    limiter = Limiter(
+        key_func=get_remote_addr,
+        default_limits=["10 per hour", "2 per minute"]
+    )
+
+
+    class ThingsResource:
+        # this is fine, as the @limiter.limit() is the topmost decorator:
+        @limiter.limit()
+        @another_decorator
+        def on_get(self, req, resp):
+            resp.body = 'Hello world!'
+
+        # the @limiter.limit() is NOT the topmost decorator, so
+        # this would NOT work - the limit would be ignored!!!!
+        # DO NOT DO THIS:
+        @another_decorator
+        @limiter.limit()
+        def on_post(self, req, resp):
+            resp.body = 'WARNING: NO LIMITS ON THIS!'
+
+        # instead register your decorators this way:
+        @register(another_decorator, limiter.limit())
+        def on_post(self, req, resp):
+            resp.body = 'This is properly limited'
+
+    app = falcon.API(middleware=limiter.middleware)
+..
+
+
+
 .. note::
     The deduct_when function must accept the 'usual' Falcon response attributes and return a boolean:
 

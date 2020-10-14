@@ -1,6 +1,12 @@
 Changelog
 =========
 
+
+Version 0.1.2
+-------------
+
+- Fixing the issue with multiple decorators when `@limiter.limit()` is not the topmost one
+
 Version 0.1.1
 -------------
 

@@ -44,43 +44,65 @@ class Middleware:
             # see the "Limiter.limit" decorator in limiter.py
             responder_wrapper_name = getattr(getattr(resource, responder), '__name__')
 
-            # is the given method (or its class) decorated?
+            # is the given method (or its class) decorated by the limit_wrap being the topmost decorator?
             if responder_wrapper_name == 'limit_wrap':
-                logger.debug(" This endpoint is decorated with a limit")
+                logger.debug(" This endpoint is decorated by 'limit' being the topmost decorator.")
+
                 # the arguments provided in the decorator (if any):
                 decorator_limits = getattr(getattr(resource, responder), '_Limiter__limits')
                 decorator_deduct_when = getattr(getattr(resource, responder), '_Limiter__deduct_when')
                 decorator_key_func = getattr(getattr(resource, responder), '_Limiter__key_func')
                 decorator_dynamic_limits = getattr(getattr(resource, responder), '_Limiter__dynamic_limits')
-
-                # set the 'limits', 'parsed_limits', 'key_func' and 'deduct_when' on the resource if doesn't exist yet
-                if not hasattr(resource, f'_{req.method}_limits'):
-                    _limits = decorator_limits if decorator_limits else self.limiter.default_limits
-                    setattr(resource, f'_{req.method}_limits', _limits)
-
-                    # parse the limits into a list of RateLimitItem objects
-                    _parsed_limits = self.parse_limits(limits=_limits) if _limits else []
-
-                    setattr(resource, f'_{req.method}_parsed_limits', _parsed_limits)
-                    logger.debug(f" The limits parsed into RateLimitItem object(s) are: {_parsed_limits}")
-
-                    setattr(resource,
-                            f'_{req.method}_key_func',
-                            decorator_key_func if decorator_key_func else
-                            self.limiter.key_func if hasattr(self.limiter, 'key_func') else None)
-                    setattr(resource,
-                            f'_{req.method}_deduct_when',
-                            decorator_deduct_when if decorator_deduct_when else
-                            self.limiter.default_deduct_when if hasattr(self.limiter, 'default_deduct_when') else None)
-                    setattr(resource,
-                            f'_{req.method}_dynamic_limits',
-                            decorator_dynamic_limits if decorator_dynamic_limits else
-                            self.limiter.default_dynamic_limits if hasattr(self.limiter, 'default_dynamic_limits')
-                            else None)
             else:
-                # no limiter was requested on this responder
-                logger.debug(" No limiter was requested for this endpoint.")
-                return
+                # 'auth_wrap' is not the topmost decorator - let's check whether 'auth' is
+                # any of the other decorator on this method (not the topmost):
+                # this requires the use of @register(decor1, decor2) as the decorator
+                if hasattr(getattr(resource, responder), '_decorators') and \
+                        'limit' in [d._decorator_name for d in getattr(resource, responder)._decorators
+                                   if hasattr(d, '_decorator_name')]:
+
+                    # pick up the limit decorator attributes from the wrap1 of the decorator:
+                    for d in getattr(resource, responder)._decorators:
+                        if hasattr(d, '_decorator_name') and getattr(d, '_decorator_name') == 'limit':
+                            decorator_limits = getattr(d, '_limits')
+                            decorator_deduct_when = getattr(d, '_deduct_when')
+                            decorator_key_func = getattr(d, '_key_func')
+                            decorator_dynamic_limits = getattr(d, '_dynamic_limits')
+                            break
+
+                    logger.debug(" This endpoint is decorated by 'limit', but it is NOT the topmost decorator.")
+                else:
+                    # no auth was requested on this responder as no decorator at all
+                    logger.debug(" No 'limit' was requested for this endpoint.")
+                    return
+
+            logger.debug(" This endpoint is decorated with a limit")
+
+            # set the 'limits', 'parsed_limits', 'key_func' and 'deduct_when' on the resource if doesn't exist yet
+            if not hasattr(resource, f'_{req.method}_limits'):
+                _limits = decorator_limits if decorator_limits else self.limiter.default_limits
+                setattr(resource, f'_{req.method}_limits', _limits)
+
+                # parse the limits into a list of RateLimitItem objects
+                _parsed_limits = self.parse_limits(limits=_limits) if _limits else []
+
+                setattr(resource, f'_{req.method}_parsed_limits', _parsed_limits)
+                logger.debug(f" The limits parsed into RateLimitItem object(s) are: {_parsed_limits}")
+
+                setattr(resource,
+                        f'_{req.method}_key_func',
+                        decorator_key_func if decorator_key_func else
+                        self.limiter.key_func if hasattr(self.limiter, 'key_func') else None)
+                setattr(resource,
+                        f'_{req.method}_deduct_when',
+                        decorator_deduct_when if decorator_deduct_when else
+                        self.limiter.default_deduct_when if hasattr(self.limiter, 'default_deduct_when') else None)
+                setattr(resource,
+                        f'_{req.method}_dynamic_limits',
+                        decorator_dynamic_limits if decorator_dynamic_limits else
+                        self.limiter.default_dynamic_limits if hasattr(self.limiter, 'default_dynamic_limits')
+                        else None)
+
 
         if not hasattr(resource, f'_{req.method}_limits'):
             logger.debug(" No limits on this resource/method.")
