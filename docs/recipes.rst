@@ -180,15 +180,15 @@ For scenarios where there is a need for multiple decorators and the ``@limiter.l
 topmost one, we need to register the decorators a special way.
 
 This scenario is complicated because our ``@limiter.limit()`` just marks the fact that the given
-method is decorated with a limit, which mark later the middleware picks up and uses. If the
-``@limiter.limit()`` is the topmost
+method is decorated with a limit, which later gets picked up by the middleware and triggers the rate limiting.
+If the ``@limiter.limit()`` is the topmost
 decorator then it is easy to pick that up, but if there are other decorators 'ahead' it, then those
 will 'hide' the  ``@limiter.limit()``. This is because decorators in Python are just syntactic sugar
 for nested function calls.
 
 To be able to tell if the given endpoint was decorated by the ``@limiter.limit()`` decorator when that is NOT
 the topmost decorator, you need to decorate your method by registering your decorators using the
-``register()`` helper decorator.
+``@register()`` helper decorator.
 
 See more about this issue at
 https://stackoverflow.com/questions/3232024/introspection-to-get-decorator-names-on-a-method

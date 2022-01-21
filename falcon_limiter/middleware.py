@@ -54,7 +54,7 @@ class Middleware:
                 decorator_key_func = getattr(getattr(resource, responder), '_Limiter__key_func')
                 decorator_dynamic_limits = getattr(getattr(resource, responder), '_Limiter__dynamic_limits')
             else:
-                # 'auth_wrap' is not the topmost decorator - let's check whether 'auth' is
+                # 'limit_wrap' is not the topmost decorator - let's check whether 'limit' is
                 # any of the other decorator on this method (not the topmost):
                 # this requires the use of @register(decor1, decor2) as the decorator
                 if hasattr(getattr(resource, responder), '_decorators') and \
@@ -72,7 +72,7 @@ class Middleware:
 
                     logger.debug(" This endpoint is decorated by 'limit', but it is NOT the topmost decorator.")
                 else:
-                    # no auth was requested on this responder as no decorator at all
+                    # no limit was requested on this responder as no decorator at all
                     logger.debug(" No 'limit' was requested for this endpoint.")
                     return
 
@@ -102,7 +102,6 @@ class Middleware:
                         decorator_dynamic_limits if decorator_dynamic_limits else
                         self.limiter.default_dynamic_limits if hasattr(self.limiter, 'default_dynamic_limits')
                         else None)
-
 
         if not hasattr(resource, f'_{req.method}_limits'):
             logger.debug(" No limits on this resource/method.")
