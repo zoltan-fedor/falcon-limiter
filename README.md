@@ -19,6 +19,9 @@ You can find the documentation of this library on [Read the Docs](https://falcon
 
 ## Quickstart
 
+
+### WSGI
+
 Quick example - using `fixed-window` strategy and storing the hits against limits in the memory:
 ```
 import falcon
@@ -42,6 +45,36 @@ app = falcon.API(middleware=limiter.middleware)
 things = ThingsResource()
 app.add_route('/things', things)
 ```
+
+### ASGI (Async)
+
+Quick example - using `fixed-window` strategy and storing the hits against limits in the memory:
+```
+import falcon.asgi
+from falcon_limiter import AsyncLimiter
+from falcon_limiter.utils import get_remote_addr
+
+limiter = AsyncLimiter(
+    key_func=get_remote_addr,
+    default_limits="5 per minute,2 per second"
+)
+
+# use the default limit for all methods of this class
+@limiter.limit()
+class ThingsResource:
+    async def on_get(self, req, resp):
+        resp.body = 'Hello world!'
+
+# add the limiter middleware to the Falcon app
+app = falcon.asgi.App(middleware=limiter.middleware)
+
+things = ThingsResource()
+app.add_route('/things', things)
+```
+
+See documentation for more about Async.
+
+### A more complicated example
 
 When making calls against this app, above >5 calls per minute or >2 per seconds you will receive
 an HTTP 429 error response with message: `"Reached allowed limit 5 hits per 1 minute!"`

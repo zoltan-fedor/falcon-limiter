@@ -24,11 +24,11 @@ sys.path.append(os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'Falcon-Limiter'
-copyright = '2020, Zoltan Fedor'
+copyright = '2022, Zoltan Fedor'
 author = 'Zoltan Fedor'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.2'
+release = '1.0.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -106,6 +106,6 @@ html_sidebars = {
 }
 
 intersphinx_mapping = {'python': ('http://docs.python.org/', None),
-                       'falcon': ("http://falcon.readthedocs.io/docs/", None),
+                       'falcon': ("http://falcon.readthedocs.io/en/stable/", None),
                        'limits': ("http://limits.readthedocs.org/en/latest/", None)
 }
