@@ -1,7 +1,7 @@
 Welcome to Falcon-Limiter's documentation!
 ==========================================
 
-Version: 0.1.2
+Version: 1.0.0
 
 Falcon-Limiter provides advanced rate limiting support to the
 `Falcon web framework <https://github.com/falconry/falcon>`_.
