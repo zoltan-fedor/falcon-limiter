@@ -34,7 +34,6 @@ class Middleware:
 
         # find out which responder ("on_..." method) is going to be used to process this request
         responder = None
-        responder = None
         for _method in dir(resource):
             if _DECORABLE_METHOD_NAME.match(_method) and _method[3:].upper() == req.method.upper():
                 responder = _method

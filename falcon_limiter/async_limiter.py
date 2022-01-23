@@ -68,7 +68,7 @@ class AsyncLimiter:
             config = {}
 
         # set the defaults for the config
-        config.setdefault('RATELIMIT_STORAGE_URL', 'memory://')
+        config.setdefault('RATELIMIT_STORAGE_URL', 'async+memory://')
         config.setdefault('RATELIMIT_STORAGE_OPTIONS', {})
         config.setdefault('RATELIMIT_STRATEGY', 'fixed-window')
         config.setdefault('RATELIMIT_KEY_PREFIX', '')
