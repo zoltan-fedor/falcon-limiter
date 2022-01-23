@@ -1,7 +1,7 @@
 Welcome to Falcon-Limiter's documentation!
 ==========================================
 
-Version: 0.1.2
+Version: 1.0.0
 
 Falcon-Limiter provides advanced rate limiting support to the
 `Falcon web framework <https://github.com/falconry/falcon>`_.
@@ -73,7 +73,7 @@ be used as a decorator to decorate a whole class or individual methods:
             resp.body = 'Hello world!'
 ..
 
-You can provide a config dictionary to the ``Limiter``, see :ref:`config-attributes`:
+You can provide a config dictionary to the ``Limiter``, see `Configuring Falcon-Limiter`_:
 
 .. code-block:: python
 
@@ -188,6 +188,9 @@ per resource and rate limit.
 
 
 .. include:: recipes.rst
+
+
+.. include:: async.rst
 
 
 

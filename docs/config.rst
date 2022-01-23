@@ -1,4 +1,3 @@
-.. _config-attributes:
 
 Configuring Falcon-Limiter
 --------------------------
