@@ -90,10 +90,9 @@ class Middleware:
                 else:
                     # no limit was requested on this responder as no decorator at all
                     logger.debug(" No 'limit' was requested for this endpoint.")
-
                     return
 
-            # set the 'limits', 'parsed_limits', 'key_func' and 'deduct_when' on the resource if doesn't exist yet
+            logger.debug(" This endpoint is decorated with a limit")
             if not hasattr(resource, f'_{req.method}_limits'):
                 _limits = decorator_limits if decorator_limits else self.limiter.default_limits
                 setattr(resource, f'_{req.method}_limits', _limits)
@@ -137,7 +136,7 @@ class Middleware:
         # if dynamic limits have been requested, then that will overwrite whatever (if anything)
         # is provided via the 'limits'
         if _dynamic_limits:
-            _limits = await _dynamic_limits(req, resp, resource, params)
+            _limits = _dynamic_limits(req, resp, resource, params)
             # parse the limits into a list of RateLimitItem objects
             _parsed_limits = await self.parse_limits(limits=_limits) if _limits else []
         # print(_parsed_limits)
@@ -192,7 +191,7 @@ class Middleware:
             _deduct_when = getattr(resource, f'_{req.method}_deduct_when')
 
             # if the deduct_when function returns True, then we hit the limits to increment their counters
-            if await _deduct_when(req, resp, resource, req_succeeded):
+            if _deduct_when(req, resp, resource, req_succeeded):
                 # hit each limit
                 for _limit in getattr(resource, f'_{req.method}_parsed_limits'):
                     # hit the given limit for the given key - but we don't care about the result,

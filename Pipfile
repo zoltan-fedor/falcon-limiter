@@ -6,6 +6,7 @@ verify_ssl = true
 [dev-packages]
 autodoc = "*"
 bump2version = "*"
+coredis = "*"
 flit = "*"
 importlib-metadata = "*"
 pylibmc = "*"

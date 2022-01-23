@@ -1,8 +1,8 @@
 import errno
 import pytest
 
-from falcon import API, testing
-from falcon_limiter import Limiter
+from falcon import asgi, API, testing
+from falcon_limiter import Limiter, AsyncLimiter
 from falcon_limiter.utils import get_remote_addr
 
 try:
@@ -31,6 +31,18 @@ def limiter(request):
     """ Create a basic limiter
     """
     limiter = Limiter(
+        key_func=get_remote_addr,
+        default_limits=["10 per hour", "1 per second"]
+    )
+    return limiter
+
+
+# parametrized fixture to create limiters with different strategies
+@pytest.fixture(params=STRATEGIES)
+def asynclimiter(request):
+    """ Create a basic limiter
+    """
+    limiter = AsyncLimiter(
         key_func=get_remote_addr,
         default_limits=["10 per hour", "1 per second"]
     )
@@ -97,7 +109,49 @@ def app(request, limiter):
 
 
 @pytest.fixture()
+def asyncapp(request, asynclimiter):
+    """ Creates a Falcon app with the default limiter
+    """
+
+    @asynclimiter.limit()
+    class ThingsResource:
+        # unmarked methods will use the default limit
+        async def on_get(self, req, resp):
+            resp.body = 'Hello world!'
+
+        # mark this method with a special limit
+        # which will overwrite the default
+        @asynclimiter.limit(limits="1 per day")
+        async def on_post(self, req, resp):
+            pass
+
+    # a resource with no limits:
+    class ThingsResourceNoLimit:
+        # unmarked methods will use the default limit
+        async def on_get(self, req, resp):
+            pass
+
+    # add the limiter middleware to the Falcon app
+    app = asgi.App(middleware=asynclimiter.middleware)
+
+    things = ThingsResource()
+    thingsnolimit = ThingsResourceNoLimit()
+
+    app.add_route('/things', things)
+    app.add_route('/thingsnolimit', thingsnolimit)
+
+    return app
+
+@pytest.fixture()
 def client(app):
     """ Creates a Falcon test client
     """
     return testing.TestClient(app)
+
+
+@pytest.fixture()
+def asyncclient(asyncapp):
+    """ Creates a Falcon test client
+    """
+    return testing.TestClient(asyncapp)
+

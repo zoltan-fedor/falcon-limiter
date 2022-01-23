@@ -95,3 +95,10 @@ A few examples to demonstrate the use of the async module.
     things = ThingsResource()
     app.add_route('/things', things)
 ..
+
+
+Please note, that when using the ``AsyncLimiter``, then a class-level decorator will overwrite
+all method-level decorators of that class. This behaviour is different from the WSGI (eg sync)
+``Limiter``, where method-level decorators overwrite the class level one.
+
+
