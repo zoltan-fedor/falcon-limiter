@@ -79,8 +79,8 @@ A few examples to demonstrate the use of the async module.
         }
     )
 
-    # The deduct_when function needs to be async as it will be awaited
-    async def deduct_when_func(req, resp, resource, req_succeeded):
+    # The deduct_when function is NOT async!
+    def deduct_when_func(req, resp, resource, req_succeeded):
         return resp.status == falcon.HTTP_200
 
     class ThingsResource:

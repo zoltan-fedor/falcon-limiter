@@ -1,2 +1,2 @@
-falcon==2.0.0
-limits==1.5.1
+falcon==3.0.0
+limits==2.3.1
