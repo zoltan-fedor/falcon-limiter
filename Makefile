@@ -20,6 +20,10 @@ help:
 	@echo "make tox"
 	@echo "    runs tox - tests in all environments"
 	@echo " "
+	@echo "make run-act"
+	@echo "    runs act - to run the GitHub Actions locally (all tests on all OS using docker),"
+	@echo "    It will fail the codecov upload - the last step of the workflow, but that is okey."
+	@echo " "
 	@echo "make tox-recreate"
 	@echo "    makes tox to recreate all its virtual environments before running the tests."
 	@echo "    This is required everytime when package dependencies change!"
@@ -56,6 +60,9 @@ tox:
 
 tox-recreate:
 	tox --recreate
+
+run-act:
+	act
 
 docs:
 	cd docs && \

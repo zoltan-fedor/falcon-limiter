@@ -1,0 +1,70 @@
+name: Run tests
+
+on:
+  # Trigger the tests workflow on push on all branches, but
+  # for pull request only on the master branch
+  push:
+    branches:
+      - "*"
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  run_test:
+    name: Python ${{matrix.python-version}} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        # python-version: ["3.8"]
+        os:
+          - "ubuntu-20.04"
+
+    # Steps to run in each job.
+    # Some are GitHub actions, others run shell commands.
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Install pipenv
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip
+          python -m pip install --upgrade pip
+          pip install pipenv
+      - name: Set up Python
+        uses: actions/setup-python@v2.1.4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pipenv'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libmemcached-dev memcached redis-server redis-sentinel python3-dev
+          python -m pip install --upgrade pip
+          pip install -U coverage setuptools tox wheel pipenv codecov pytest pytest-cov
+          python --version
+          pip --version
+          pipenv --version
+          tox --version
+          coverage --version
+          pipenv install --dev
+          # importlib-metadata is needed for Python 3.6 and 3.7
+          pipenv install --dev importlib-metadata
+
+      - name: Test with pytest
+        run: |
+          pipenv run pytest --cov-report xml:coverage.xml --cov-report term-missing
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        if: ${{ matrix.python-version == '3.8' }}
+        with:
+          # token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+          env_vars: PYTHON
+          files: ./coverage.xml
+          flags: pytest
+          fail_ci_if_error: true
+          verbose: true

@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/zoltan-fedor/falcon-limiter.svg?branch=main)](https://travis-ci.com/zoltan-fedor/falcon-limiter)
+[![example workflow](https://github.com/zoltan-fedor/falcon-limiter/actions/workflows/test.yaml/badge.svg)](https://github.com/zoltan-fedor/falcon-limiter/actions?query=workflow%3A%22Run+tests%22)
 [![codecov](https://codecov.io/gh/zoltan-fedor/falcon-limiter/branch/main/graph/badge.svg)](https://codecov.io/gh/zoltan-fedor/falcon-limiter)
 [![Documentation Status](https://readthedocs.org/projects/falcon-limiter/badge/?version=latest)](https://falcon-limiter.readthedocs.io/en/latest/?badge=latest)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/zoltan-fedor/falcon-limiter)
