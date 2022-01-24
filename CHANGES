@@ -2,6 +2,12 @@ Changelog
 =========
 
 
+Version 1.0.1
+-------------
+
+- Switching CI from Travis to GitHub Actions
+
+
 Version 1.0.0
 -------------
 
