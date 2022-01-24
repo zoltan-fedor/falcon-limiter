@@ -91,10 +91,10 @@ jobs:
           pipenv --version
           tox --version
           coverage --version
-          pipenv install
-          pipenv install --dev
+          pipenv install --system
+          pipenv install --dev --system
           # importlib-metadata is needed for Python 3.6 and 3.7
-          pipenv install --dev importlib-metadata
+          pipenv install --dev importlib-metadata --system
           pip list
 
 #      - name: Run tests
@@ -103,7 +103,6 @@ jobs:
 
       - name: Test with pytest
         run: |
-          pipenv shell
           pytest --cov-report term-missing
 
       - name: Combine coverage
