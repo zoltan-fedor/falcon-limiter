@@ -17,7 +17,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        # python-version: ["3.7", "3.8", "3.9", "3.10"]
+        python-version: ["3.8"]
         os:
           - "ubuntu-20.04"
 #        toxenv:
@@ -102,6 +103,7 @@ jobs:
 
       - name: Test with pytest
         run: |
+          pipenv shell
           pytest --cov-report term-missing
 
       - name: Combine coverage
