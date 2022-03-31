@@ -42,6 +42,7 @@ Documentation = "https://falcon-limiter.readthedocs.io/en/latest/"
 
 [tool.flit.metadata.requires-extra]
 test = [
+    "coredis",
     "flit",
     "pylibmc",
     "pytest >=4.0.0",

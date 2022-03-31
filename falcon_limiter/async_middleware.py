@@ -5,7 +5,7 @@ import re
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Tuple, Iterable, Union
 
 if TYPE_CHECKING:
-    from falcon_limiter.limiter import Limiter
+    from falcon_limiter.async_limiter import AsyncLimiter
     from limits import RateLimitItem
 
 logger = logging.getLogger(__name__)
@@ -19,7 +19,7 @@ class Middleware:
     a Falcon Middleware
     """
 
-    def __init__(self, limiter: 'Limiter') -> None:
+    def __init__(self, limiter: 'AsyncLimiter') -> None:
         self.limiter = limiter
 
     async def process_resource(self, req, resp, resource, params):
