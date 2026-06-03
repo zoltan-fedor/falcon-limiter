@@ -1,6 +1,6 @@
 """ Tests the use of the key_prefix
 """
-from falcon import API, testing, HTTP_200, HTTP_429
+from falcon import App, testing, HTTP_200, HTTP_429
 from falcon_limiter import Limiter
 from falcon_limiter.utils import get_remote_addr
 from time import sleep
@@ -21,9 +21,9 @@ def test_different_key_prefixes():
     @limiter1.limit()
     class ThingsResource:
         def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
-    app1 = API(middleware=limiter1.middleware)
+    app1 = App(middleware=limiter1.middleware)
     app1.add_route('/things', ThingsResource())
 
     client1 = testing.TestClient(app1)
@@ -49,9 +49,9 @@ def test_different_key_prefixes():
     @limiter2.limit()
     class ThingsResource:
         def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
-    app2 = API(middleware=limiter2.middleware)
+    app2 = App(middleware=limiter2.middleware)
     app2.add_route('/things', ThingsResource())
 
     client2 = testing.TestClient(app2)

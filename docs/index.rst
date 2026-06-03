@@ -1,7 +1,7 @@
 Welcome to Falcon-Limiter's documentation!
 ==========================================
 
-Version: 1.0.1
+Version: 2.0.0
 
 Falcon-Limiter provides advanced rate limiting support to the
 `Falcon web framework <https://github.com/falconry/falcon>`_.
@@ -9,7 +9,7 @@ Falcon-Limiter provides advanced rate limiting support to the
 Rate limiting strategies are provided with the help of the popular
 `Limits <https://github.com/alisaifee/limits>`_ library.
 
-The library aims to be compatible with CPython 3.6+ and PyPy 3.5+.
+The library aims to be compatible with CPython 3.10+ and PyPy 3.10+.
 
 .. include:: quickstart.rst
 
@@ -58,19 +58,19 @@ be used as a decorator to decorate a whole class or individual methods:
     @limiter.limit()
     class ThingsResource:
         def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     # use the default limit for all methods of this class
     @limiter.limit()
     class ThingsResource2:
         # this will use the default limit from the class
         def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
         # this will use a custom limit overwriting the one set at class level
         @limiter.limit(limits="3 per minute,1 per second")
         def on_post(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 ..
 
 You can provide a config dictionary to the ``Limiter``, see `Configuring Falcon-Limiter`_:
@@ -93,7 +93,7 @@ You can provide a config dictionary to the ``Limiter``, see `Configuring Falcon-
 ..
 
 The limiter instance needs to be specified as a middleware when creating the app by
-calling ``falcon.API()``:
+calling ``falcon.App()``:
 
 .. code-block:: python
 
@@ -109,10 +109,10 @@ calling ``falcon.API()``:
     @limiter.limit()
     class ThingsResource:
         def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     # add the limiter middleware to the Falcon app
-    app = falcon.API(middleware=limiter.middleware)
+    app = falcon.App(middleware=limiter.middleware)
 ..
 
 .. _ratelimit-string:

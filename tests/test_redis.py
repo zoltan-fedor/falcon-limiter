@@ -2,7 +2,7 @@
 so strictly speaking we wouldn't need to test it - we are going to test Redis,
 our most popular backend
 """
-from falcon import API, testing, HTTP_200, HTTP_429
+from falcon import App, testing, HTTP_200, HTTP_429
 from falcon_limiter import Limiter
 from falcon_limiter.utils import get_remote_addr
 from time import sleep
@@ -25,9 +25,9 @@ def test_redis(redis_server):
     @limiter.limit()
     class ThingsResource:
         def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
-    app = API(middleware=limiter.middleware)
+    app = App(middleware=limiter.middleware)
     app.add_route('/things', ThingsResource())
 
     client = testing.TestClient(app)

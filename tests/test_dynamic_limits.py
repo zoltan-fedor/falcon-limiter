@@ -1,6 +1,6 @@
 """ Testing the dynamic_limits option
 """
-from falcon import API, testing, HTTP_200, HTTP_429, HTTP_500
+from falcon import App, testing, HTTP_200, HTTP_429, HTTP_500
 from falcon_limiter import Limiter
 from falcon_limiter.utils import get_remote_addr
 from time import sleep
@@ -19,9 +19,9 @@ def test_default_dynamic_limits():
     @limiter.limit()
     class ThingsResource:
         def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
-    app = API(middleware=limiter.middleware)
+    app = App(middleware=limiter.middleware)
     app.add_route('/things', ThingsResource())
 
     client = testing.TestClient(app)
@@ -66,12 +66,12 @@ def test_dynamic_limits_on_method():
         @limiter.limit(dynamic_limits=lambda req, resp, resource, req_succeeded: '5/second'
             if req.get_header('APIUSER') == 'admin' else '2/second')
         def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
         def on_post(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
-    app = API(middleware=limiter.middleware)
+    app = App(middleware=limiter.middleware)
     app.add_route('/things', ThingsResource())
 
     client = testing.TestClient(app)
@@ -125,12 +125,12 @@ def test_dynamic_limits_on_method2():
         @limiter.limit(dynamic_limits=lambda req, resp, resource, req_succeeded: '5/second'
             if req.get_header('APIUSER') == 'admin' else '2/second')
         def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
         def on_post(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
-    app = API(middleware=limiter.middleware)
+    app = App(middleware=limiter.middleware)
     app.add_route('/things', ThingsResource())
 
     client = testing.TestClient(app)
@@ -183,13 +183,13 @@ def test_dynamic_limits_on_class():
         if req.get_header('APIUSER') == 'admin' else '2/second')
     class ThingsResource:
         def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
         @limiter.limit(limits="3/second")
         def on_post(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
-    app = API(middleware=limiter.middleware)
+    app = App(middleware=limiter.middleware)
     app.add_route('/things', ThingsResource())
 
     client = testing.TestClient(app)

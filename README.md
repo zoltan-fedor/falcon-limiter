@@ -1,5 +1,4 @@
 [![example workflow](https://github.com/zoltan-fedor/falcon-limiter/actions/workflows/test.yaml/badge.svg)](https://github.com/zoltan-fedor/falcon-limiter/actions?query=workflow%3A%22Run+tests%22)
-[![codecov](https://codecov.io/gh/zoltan-fedor/falcon-limiter/branch/main/graph/badge.svg)](https://codecov.io/gh/zoltan-fedor/falcon-limiter)
 [![Documentation Status](https://readthedocs.org/projects/falcon-limiter/badge/?version=latest)](https://falcon-limiter.readthedocs.io/en/latest/?badge=latest)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/zoltan-fedor/falcon-limiter)
 
@@ -9,7 +8,7 @@ This library provides advanced rate limiting support for the [Falcon web framewo
 
 Rate limiting is provided with the help of the popular [Limits](https://github.com/alisaifee/limits) library.
 
-This library aims to be compatible with CPython 3.6+ and PyPy 3.5+.
+This library aims to be compatible with CPython 3.10+ and PyPy 3.10+.
 
 
 ## Documentation
@@ -37,10 +36,10 @@ limiter = Limiter(
 @limiter.limit()
 class ThingsResource:
     def on_get(self, req, resp):
-        resp.body = 'Hello world!'
+        resp.text = 'Hello world!'
 
 # add the limiter middleware to the Falcon app
-app = falcon.API(middleware=limiter.middleware)
+app = falcon.App(middleware=limiter.middleware)
 
 things = ThingsResource()
 app.add_route('/things', things)
@@ -63,7 +62,7 @@ limiter = AsyncLimiter(
 @limiter.limit()
 class ThingsResource:
     async def on_get(self, req, resp):
-        resp.body = 'Hello world!'
+        resp.text = 'Hello world!'
 
 # add the limiter middleware to the Falcon app
 app = falcon.asgi.App(middleware=limiter.middleware)
@@ -71,6 +70,18 @@ app = falcon.asgi.App(middleware=limiter.middleware)
 things = ThingsResource()
 app.add_route('/things', things)
 ```
+
+> **Note:** When using Redis or other network-based storage backends with `AsyncLimiter`,
+> you must initialize the backend before use and close it during shutdown:
+> ```python
+> await limiter.initialize()
+> app = falcon.asgi.App(middleware=limiter.middleware)
+> # later, during app shutdown:
+> await limiter.close()
+> # or use as a context manager:
+> async with limiter:
+>     app = falcon.asgi.App(middleware=limiter.middleware)
+> ```
 
 See documentation for more about Async.
 
@@ -107,7 +118,7 @@ limiter = Limiter(
 class ThingsResource:
     # no rate limit on this method
     def on_get(self, req, resp):
-        resp.body = 'Hello world!'
+        resp.text = 'Hello world!'
 
     # a more strict rate limit applied to this method
     # with a custom key function serving up the user_id
@@ -115,7 +126,7 @@ class ThingsResource:
     @limiter.limit(limits="3 per minute,1 per second",
         key_func=lambda req, resp, resource, params: req.context.user_id)
     def on_post(self, req, resp):
-        resp.body = 'Hello world!'
+        resp.text = 'Hello world!'
 
 class SpecialResource:
     # dynamic_limits allowing the 'admin' user a higher limit than others
@@ -123,10 +134,10 @@ class SpecialResource:
         '999/minute,9999/second' if req.context.user == 'admin'
         else '5 per minute,2/second')
     def on_get(self, req, resp):
-        resp.body = 'Hello world!'
+        resp.text = 'Hello world!'
 
 # add the limiter middleware to the Falcon app
-app = falcon.API(middleware=limiter.middleware)
+app = falcon.App(middleware=limiter.middleware)
 
 things = ThingsResource()
 special = SpecialResource()
@@ -157,14 +168,16 @@ Now you can access the documentation locally under `http://127.0.0.1:8088/_build
 
 ### Development environment
 
-You will need Python 3.6-3.9 and PyPy3 and its source package installed to run
+You will need Python 3.10+ and its source package installed to run
 `tox` in all environments.
 
-We do use type hinting and run MyPy on those, but unfortunately MyPy currently breaks
-the PyPy tests due to the `typed-ast` package's "bug" (see
-https://github.com/python/typed_ast/issues/97). Also with Pipenv you can't 
-have a second Pipfile. This is why for now we don't have `mypy` listed as a dev package
-in the Pipfile.
+### Running tests
+
+```
+$ pip install pipenv
+$ pipenv install --dev
+$ pipenv run pytest
+```
 
 ## Credits
 

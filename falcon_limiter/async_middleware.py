@@ -175,7 +175,7 @@ class Middleware:
                 logger.debug(f" Reached allowed limit '{_limit}' for key '{_key}'")
                 resp.status = HTTP_429
                 # outputing message: "Reached allowed limit 5 hits per 1 minute!"
-                raise HTTPTooManyRequests(f"Reached allowed limit {str(_limit).replace(' per ', ' hits per ')}!")
+                raise HTTPTooManyRequests(description=f"Reached allowed limit {str(_limit).replace(' per ', ' hits per ')}!")
 
 
     async def process_response(self, req, resp, resource, req_succeeded):

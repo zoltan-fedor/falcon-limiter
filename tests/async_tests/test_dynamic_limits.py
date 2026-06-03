@@ -19,7 +19,7 @@ def test_default_dynamic_limits():
     @limiter.limit()
     class ThingsResource:
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     app = asgi.App(middleware=limiter.middleware)
     app.add_route('/things', ThingsResource())
@@ -66,10 +66,10 @@ def test_dynamic_limits_on_method():
         @limiter.limit(dynamic_limits=lambda req, resp, resource, req_succeeded: '5/second'
             if req.get_header('APIUSER') == 'admin' else '2/second')
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
         async def on_post(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     app = asgi.App(middleware=limiter.middleware)
     app.add_route('/things', ThingsResource())
@@ -125,10 +125,10 @@ def test_dynamic_limits_on_method2():
     class ThingsResource:
         @limiter.limit()
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
         async def on_post(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     app = asgi.App(middleware=limiter.middleware)
     app.add_route('/things', ThingsResource())
@@ -175,11 +175,11 @@ def test_dynamic_limits_on_class():
         @limiter.limit(dynamic_limits=lambda req, resp, resource, req_succeeded: '5/second'
             if req.get_header('APIUSER') == 'admin' else '2/second')
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
         @limiter.limit(limits="3/second")
         async def on_post(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     app = asgi.App(middleware=limiter.middleware)
     app.add_route('/things', ThingsResource())

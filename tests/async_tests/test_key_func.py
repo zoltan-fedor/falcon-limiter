@@ -19,7 +19,7 @@ def test_get_remote_addr():
     @limiter.limit()
     class ThingsResource:
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     app = asgi.App(middleware=limiter.middleware)
     app.add_route('/things', ThingsResource())
@@ -54,7 +54,7 @@ def test_reverse_proxies():
     @limiter.limit()
     class ThingsResource:
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     # two different source IPs through 1 reverse proxy:
     ip1_header = {"X-FORWARDED-FOR": "10.0.0.1, 1.2.3.4"}
@@ -92,10 +92,10 @@ def test_limit_by_resource_and_method():
     @limiter.limit()
     class ThingsResource:
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
         async def on_post(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     app = asgi.App(middleware=limiter.middleware)
     app.add_route('/things', ThingsResource())
@@ -130,9 +130,9 @@ def test_limit_by_resource_and_method():
 #     @limiter.limit(key_func=get_key)
 #     class ThingsResource:
 #         def on_get(self, req, resp):
-#             resp.body = 'Hello world!'
+#             resp.text = 'Hello world!'
 #
-#     app = API(middleware=limiter.middleware)
+#     app = App(middleware=limiter.middleware)
 #     app.add_route('/things', ThingsResource())
 #
 #     client = testing.TestClient(app)
@@ -161,9 +161,9 @@ def test_limit_by_resource_and_method():
 #     class ThingsResource:
 #         @limiter.limit(limits="1 per minute", key_func=get_key)
 #         def on_get(self, req, resp):
-#             resp.body = 'Hello world!'
+#             resp.text = 'Hello world!'
 #
-#     app = API(middleware=limiter.middleware)
+#     app = App(middleware=limiter.middleware)
 #     app.add_route('/things', ThingsResource())
 #
 #     client = testing.TestClient(app)

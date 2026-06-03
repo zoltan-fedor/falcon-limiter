@@ -18,11 +18,10 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.5",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
     "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
@@ -31,11 +30,11 @@ classifiers = [
     "Typing :: Typed"
 ]
 requires = [
-    "falcon >=1.0.0",
+    "falcon >=4.0.0",
     "limits"
 ]
 description-file = "README.md"
-requires-python = ">=3.6"
+requires-python = ">=3.10"
 
 [tool.flit.metadata.urls]
 Documentation = "https://falcon-limiter.readthedocs.io/en/latest/"
@@ -43,16 +42,13 @@ Documentation = "https://falcon-limiter.readthedocs.io/en/latest/"
 [tool.flit.metadata.requires-extra]
 test = [
     "coredis",
-    "flit",
     "pylibmc",
     "pytest >=4.0.0",
     "pytest-cov",
-    "pytest-pep8",
+    "pytest-timeout",
     "pytest-xdist",
     "pytest-xprocess",
     "redis",
-    "tox",
-    "tox-pipenv-install"
 ]
 doc = []
 dev = []

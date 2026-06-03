@@ -36,13 +36,13 @@ a custom key function which derives the requestor's IP address from the ``access
     @limiter.limit()
     class ThingsResource:
         def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
         # this endpoint is routed differently (through 2 proxies), so it
         # requires a custom key function specific to this method
         @limiter.limit(key_func=lambda req, resp, resource, params: req.access_route[-3])
         def on_post(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 ..
 
 .. note::
@@ -130,10 +130,10 @@ given requester belongs to.
             '5/second'if req.get_header('APIUSER') == 'admin'
             else '20/minute,2/second'
         def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
         def on_post(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
 ..
 
@@ -166,10 +166,10 @@ parameter or to the decorator as ``deduct_when`` parameter.
         @limiter.limit(deduct_when=lambda req, resp, resource, req_succeeded:
             resp.status != falcon.HTTP_500)
         def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
         def on_post(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 ..
 
 
@@ -211,7 +211,7 @@ https://stackoverflow.com/questions/3232024/introspection-to-get-decorator-names
         @limiter.limit()
         @another_decorator
         def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
         # the @limiter.limit() is NOT the topmost decorator, so
         # this would NOT work - the limit would be ignored!!!!
@@ -219,14 +219,14 @@ https://stackoverflow.com/questions/3232024/introspection-to-get-decorator-names
         @another_decorator
         @limiter.limit()
         def on_post(self, req, resp):
-            resp.body = 'WARNING: NO LIMITS ON THIS!'
+            resp.text = 'WARNING: NO LIMITS ON THIS!'
 
         # instead register your decorators this way:
         @register(another_decorator, limiter.limit())
         def on_post(self, req, resp):
-            resp.body = 'This is properly limited'
+            resp.text = 'This is properly limited'
 
-    app = falcon.API(middleware=limiter.middleware)
+    app = falcon.App(middleware=limiter.middleware)
 ..
 
 

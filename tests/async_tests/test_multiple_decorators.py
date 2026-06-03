@@ -1,5 +1,7 @@
 """ Testing scenarios when there are multiple decorators in different order
 """
+import inspect
+
 from falcon import asgi, testing, HTTP_200, HTTP_429, HTTP_405
 from falcon_limiter import AsyncLimiter
 from falcon_limiter.utils import get_remote_addr
@@ -15,7 +17,10 @@ def async_decorator(f):
     """ Just a random decorator for testing purposes
     """
     async def wrapper(*args, **kwargs):
-        return f(*args, **kwargs)
+        result = f(*args, **kwargs)
+        if inspect.isawaitable(result):
+            return await result
+        return result
     return wrapper
 
 
@@ -34,16 +39,16 @@ def test_multiple_decorators_on_method(asynclimiter):
         @asynclimiter.limit()
         @async_decorator
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
         @async_decorator
         @asynclimiter.limit()
         async def on_post(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
         @register(async_decorator, asynclimiter.limit())
         async def on_put(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     app = asgi.App(middleware=asynclimiter.middleware)
     app.add_route('/things', ThingsResource())
@@ -102,7 +107,7 @@ def test_multiple_decorators_on_class(asynclimiter):
     @register(sync_decorator, asynclimiter.limit())
     class ThingsResource:
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     app = asgi.App(middleware=asynclimiter.middleware)
     app.add_route('/things', ThingsResource())

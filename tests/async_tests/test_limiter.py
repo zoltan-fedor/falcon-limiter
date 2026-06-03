@@ -12,7 +12,7 @@ def test_default_limit(asynclimiter):
     @asynclimiter.limit()
     class ThingsResource:
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
         async def some_other_method(self):
             pass
@@ -39,11 +39,11 @@ def test_no_limit(asynclimiter):
     @asynclimiter.limit()
     class ThingsResource:
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     class ThingsResourceNoLimit:
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     app = asgi.App(middleware=asynclimiter.middleware)
     app.add_route('/things', ThingsResource())
@@ -72,7 +72,7 @@ def test_limit_on_method(asynclimiter):
     class ThingsResource:
         @asynclimiter.limit()
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     app = asgi.App(middleware=asynclimiter.middleware)
     app.add_route('/things', ThingsResource())
@@ -97,7 +97,7 @@ def test_limit_on_method_overwrite(asynclimiter):
         # the default limit on 'limiter' is 1 per second
         @asynclimiter.limit(limits="2 per second")
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     app = asgi.App(middleware=asynclimiter.middleware)
     app.add_route('/things', ThingsResource())
@@ -125,7 +125,7 @@ def test_limit_on_method_overwrite_multiple(asynclimiter):
         # the default limit on 'limiter' is 1 per second
         @asynclimiter.limit(limits="5 per hour;2 per second")
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     app = asgi.App(middleware=asynclimiter.middleware)
     app.add_route('/things', ThingsResource())
@@ -153,7 +153,7 @@ def test_limit_on_method_overwrite_multiple_short_notation(asynclimiter):
         # the default limit on 'limiter' is 1 per second
         @asynclimiter.limit(limits="5 per hour;2/second")
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     app = asgi.App(middleware=asynclimiter.middleware)
     app.add_route('/things', ThingsResource())
@@ -180,7 +180,7 @@ def test_limit_as_iterable(asynclimiter):
         # the default limit on 'limiter' is 1 per second
         @asynclimiter.limit(limits=["5 per hour", "2 per second"])
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     app = asgi.App(middleware=asynclimiter.middleware)
     app.add_route('/things', ThingsResource())
@@ -207,7 +207,7 @@ def test_limit_w_commas(asynclimiter):
         # the default limit on 'limiter' is 1 per second
         @asynclimiter.limit(limits="5 per hour,2 per second")
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     app = asgi.App(middleware=asynclimiter.middleware)
     app.add_route('/things', ThingsResource())
@@ -234,7 +234,7 @@ def test_limit_w_semicol(asynclimiter):
         # the default limit on 'limiter' is 1 per second
         @asynclimiter.limit(limits="5 per hour;2 per second")
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     app = asgi.App(middleware=asynclimiter.middleware)
     app.add_route('/things', ThingsResource())
@@ -261,7 +261,7 @@ def test_limit_class(asynclimiter):
     @asynclimiter.limit(limits="5 per hour;2 per second")
     class ThingsResource:
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     app = asgi.App(middleware=asynclimiter.middleware)
     app.add_route('/things', ThingsResource())
@@ -293,7 +293,7 @@ def test_limit_class_and_method(asynclimiter):
         # the default limit on 'limiter' is 1 per second
         @asynclimiter.limit(limits="5 per hour;2 per second")
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     app = asgi.App(middleware=asynclimiter.middleware)
     app.add_route('/things', ThingsResource())
@@ -329,7 +329,7 @@ def test_empy_limits():
     @limiter.limit()
     class ThingsResource:
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     app = asgi.App(middleware=limiter.middleware)
     app.add_route('/things', ThingsResource())
@@ -348,7 +348,7 @@ def test_undefined_endpointasync(asynclimiter):
     @asynclimiter.limit()
     class ThingsResource:
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     app = asgi.App(middleware=asynclimiter.middleware)
     app.add_route('/things', ThingsResource())
