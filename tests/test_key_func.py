@@ -1,6 +1,6 @@
 """ Tests with different key_func
 """
-from falcon import API, testing, HTTP_200, HTTP_429
+from falcon import App, testing, HTTP_200, HTTP_429
 from falcon_limiter import Limiter
 from falcon_limiter.utils import get_remote_addr
 import pytest
@@ -19,9 +19,9 @@ def test_get_remote_addr():
     @limiter.limit()
     class ThingsResource:
         def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
-    app = API(middleware=limiter.middleware)
+    app = App(middleware=limiter.middleware)
     app.add_route('/things', ThingsResource())
 
     client = testing.TestClient(app)
@@ -54,13 +54,13 @@ def test_reverse_proxies():
     @limiter.limit()
     class ThingsResource:
         def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     # two different source IPs through 1 reverse proxy:
     ip1_header = {"X-FORWARDED-FOR": "10.0.0.1, 1.2.3.4"}
     ip2_header = {"X-FORWARDED-FOR": "10.0.0.2, 1.2.3.4"}
 
-    app = API(middleware=limiter.middleware)
+    app = App(middleware=limiter.middleware)
     app.add_route('/things', ThingsResource())
 
     client = testing.TestClient(app)
@@ -92,12 +92,12 @@ def test_limit_by_resource_and_method():
     @limiter.limit()
     class ThingsResource:
         def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
         def on_post(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
-    app = API(middleware=limiter.middleware)
+    app = App(middleware=limiter.middleware)
     app.add_route('/things', ThingsResource())
 
     client = testing.TestClient(app)
@@ -130,9 +130,9 @@ def test_limit_by_resource_and_method():
 #     @limiter.limit(key_func=get_key)
 #     class ThingsResource:
 #         def on_get(self, req, resp):
-#             resp.body = 'Hello world!'
+#             resp.text = 'Hello world!'
 #
-#     app = API(middleware=limiter.middleware)
+#     app = App(middleware=limiter.middleware)
 #     app.add_route('/things', ThingsResource())
 #
 #     client = testing.TestClient(app)
@@ -161,9 +161,9 @@ def test_limit_by_resource_and_method():
 #     class ThingsResource:
 #         @limiter.limit(limits="1 per minute", key_func=get_key)
 #         def on_get(self, req, resp):
-#             resp.body = 'Hello world!'
+#             resp.text = 'Hello world!'
 #
-#     app = API(middleware=limiter.middleware)
+#     app = App(middleware=limiter.middleware)
 #     app.add_route('/things', ThingsResource())
 #
 #     client = testing.TestClient(app)

@@ -1,6 +1,6 @@
 """ Testing scenarios when there are multiple decorators in different order
 """
-from falcon import API, testing, HTTP_200, HTTP_429, HTTP_405
+from falcon import App, testing, HTTP_200, HTTP_429, HTTP_405
 from falcon_limiter import Limiter
 from falcon_limiter.utils import get_remote_addr
 from falcon_limiter.utils import register
@@ -26,18 +26,18 @@ def test_multiple_decorators_on_method(limiter):
         @limiter.limit()
         @a_decorator
         def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
         @a_decorator
         @limiter.limit()
         def on_post(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
         @register(a_decorator, limiter.limit())
         def on_put(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
-    app = API(middleware=limiter.middleware)
+    app = App(middleware=limiter.middleware)
     app.add_route('/things', ThingsResource())
 
     #####
@@ -94,9 +94,9 @@ def test_multiple_decorators_on_class(limiter):
     @register(a_decorator, limiter.limit())
     class ThingsResource:
         def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
-    app = API(middleware=limiter.middleware)
+    app = App(middleware=limiter.middleware)
     app.add_route('/things', ThingsResource())
 
     client = testing.TestClient(app)

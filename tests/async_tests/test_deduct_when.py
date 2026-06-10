@@ -19,10 +19,10 @@ def test_deduct_when_http200_as_default_deduct():
     @limiter.limit()
     class ThingsResource:
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
         async def on_post(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
             resp.status = HTTP_500
 
     app = asgi.App(middleware=limiter.middleware)
@@ -58,10 +58,10 @@ def test_deduct_when_http200_as_class_decorator():
     @limiter.limit(deduct_when=lambda req, resp, resource, req_succeeded: resp.status == HTTP_200)
     class ThingsResource:
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
         async def on_post(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
             resp.status = HTTP_500
 
     app = asgi.App(middleware=limiter.middleware)
@@ -98,11 +98,11 @@ def test_deduct_when_http200_as_method_decorator():
     @limiter.limit(deduct_when=lambda req, resp, resource, req_succeeded: resp.status == HTTP_200)
     class ThingsResource:
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
         @limiter.limit()
         async def on_post(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
             resp.status = HTTP_500
 
     app = asgi.App(middleware=limiter.middleware)

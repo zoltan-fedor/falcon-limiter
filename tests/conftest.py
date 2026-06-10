@@ -1,12 +1,14 @@
+import asyncio
 import errno
+import warnings
 import pytest
 
-from falcon import asgi, API, testing
+from falcon import asgi, App, testing
 from falcon_limiter import Limiter, AsyncLimiter
 from falcon_limiter.utils import get_remote_addr
 
 try:
-    __import__("pytest_xprocess")
+    __import__("xprocess")
     from xprocess import ProcessStarter
 except ImportError:
     @pytest.fixture(scope="session")
@@ -23,6 +25,17 @@ STRATEGIES = [
 # which port the Redis server will be listening on
 # which is started by xprocess
 REDIS_PORT = 63799
+
+
+@pytest.fixture(autouse=True)
+def _ensure_event_loop():
+    """Ensure an event loop exists for Python 3.10 compatibility."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", DeprecationWarning)
+        try:
+            asyncio.get_event_loop()
+        except RuntimeError:
+            asyncio.set_event_loop(asyncio.new_event_loop())
 
 
 # parametrized fixture to create limiters with different strategies
@@ -82,7 +95,7 @@ def app(request, limiter):
     class ThingsResource:
         # unmarked methods will use the default limit
         def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
         # mark this method with a special limit
         # which will overwrite the default
@@ -97,7 +110,7 @@ def app(request, limiter):
             pass
 
     # add the limiter middleware to the Falcon app
-    app = API(middleware=limiter.middleware)
+    app = App(middleware=limiter.middleware)
 
     things = ThingsResource()
     thingsnolimit = ThingsResourceNoLimit()
@@ -117,7 +130,7 @@ def asyncapp(request, asynclimiter):
     class ThingsResource:
         # unmarked methods will use the default limit
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
         # mark this method with a special limit
         # which will overwrite the default

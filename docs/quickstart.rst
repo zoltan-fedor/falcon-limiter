@@ -21,10 +21,10 @@ Quick example - using `fixed-window` strategy and storing the hits against limit
     @limiter.limit()
     class ThingsResource:
         def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     # add the limiter middleware to the Falcon app
-    app = falcon.API(middleware=limiter.middleware)
+    app = falcon.App(middleware=limiter.middleware)
 
     things = ThingsResource()
     app.add_route('/things', things)
@@ -52,7 +52,7 @@ Quick example - using `fixed-window` strategy and storing the hits against limit
     @limiter.limit()
     class ThingsResource:
         async def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     # add the limiter middleware to the Falcon app
     app = falcon.asgi.App(middleware=limiter.middleware)
@@ -100,7 +100,7 @@ and running the application behind a reverse proxy:
     class ThingsResource:
         # no rate limit on this method
         def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
         # a more strict rate limit applied to this method
         # with a custom key function serving up the user_id
@@ -108,7 +108,7 @@ and running the application behind a reverse proxy:
         @limiter.limit(limits="3 per minute,1 per second",
             key_func=lambda req, resp, resource, params: req.context.user_id)
         def on_post(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     class SpecialResource:
         # dynamic_limits allowing the 'admin' user a higher limit than others
@@ -116,10 +116,10 @@ and running the application behind a reverse proxy:
             '999/minute,9999/second' if req.context.user == 'admin'
             else '5 per minute,2/second')
         def on_get(self, req, resp):
-            resp.body = 'Hello world!'
+            resp.text = 'Hello world!'
 
     # add the limiter middleware to the Falcon app
-    app = falcon.API(middleware=limiter.middleware)
+    app = falcon.App(middleware=limiter.middleware)
 
     things = ThingsResource()
     special = SpecialResource()
